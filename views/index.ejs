@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT-4 Web UI</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>ChatGPT-3.5 Web UI with Voice</h1>
+        <div class="chat-container" id="chat-container">
+            <!-- Chat messages will be appended here -->
+        </div>
+        <form id="chat-form">
+            <div class="controls-container">
+                <label for="temperature" class="temperature-label">Temperature:</label>
+                <select id="temperature" class="temperature-select">
+                    <option value="0.2">0.2</option>
+                    <option value="0.4">0.4</option>
+                    <option value="0.5" selected>0.5</option>
+                    <option value="0.6">0.6</option>
+                    <option value="0.8">0.8</option>
+                    <option value="1.0">1.0</option>
+                </select>
+                <label for="tts-language" class="tts-language-label">TTS Language:</label>
+                <select id="tts-language" class="tts-language-select">
+                    <option value="en-US" selected>en-US</option>
+                    <option value="es-US">es-US</option>
+                </select>
+                <label for="tts-toggle" class="tts-label">Text-to-Speech:</label>
+                <input type="checkbox" id="tts-toggle" class="tts-checkbox">
+                <button id="voice-input-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path d="M176 352c53.02 0 96-42.98 96-96V96c0-53.02-42.98-96-96-96S80 42.98 80 96v160c0 53.02 42.98 96 96 96zm160-160h-16c-8.84 0-16 7.16-16 16v48c0 74.8-64.49 134.82-140.79 127.38C96.71 376.89 48 317.11 48 250.3V208c0-8.84-7.16-16-16-16H16c-8.84 0-16 7.16-16 16v40.16c0 89.64 63.97 169.55 152 181.69V464H96c-8.84 0-16 7.16-16 16v16c0 8.84 7.16 16 16 16h160c8.84 0 16-7.16 16-16v-16c0-8.84-7.16-16-16-16h-56v-33.77C285.71 418.47 352 344.9 352 256v-48c0-8.84-7.16-16-16-16z"/></svg>
+                </button>
+            </div>
+            <div class="input-container">
+                <textarea id="user-input" placeholder="Type your message here..." autocomplete="off" rows="1"></textarea>
+                <button type="submit">Send</button>
+            </div>
+        </form>
+    </div>
+    <script>
+        $(document).ready(function() {
+            let conversationHistory = '';
+
+            const textarea = document.getElementById('user-input');
+            textarea.addEventListener('input', resizeTextarea);
+            textarea.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.querySelector('#chat-form').dispatchEvent(new Event('submit'));
+                }
+            });
+
+
+            $('#chat-form').on('submit', function(e) {
+                e.preventDefault();
+                const userInput = $('#user-input').val().trim();
+                conversationHistory += `Human: ${userInput}\nAI:`;
+                if (!userInput) return;
+
+                // Append user message
+                $('#chat-container').append(`<div class="message user-message">${userInput}</div>`);
+                scrollToBottom(); 
+
+                $.ajax({
+                    url: '/generate',
+                    type: 'POST',
+                    data: JSON.stringify({ prompt: conversationHistory, temperature: parseFloat($('#temperature').val()) }),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response && response.choices[0]) {
+                            const aiResponse = response.choices[0].text.trim();
+                            // Append AI response
+                            const aiMessageElement = $('<div class="message ai-message"></div>');
+                            $('#chat-container').append(aiMessageElement);
+                            if ($('#tts-toggle').is(':checked')) {
+                                playAudio(aiResponse);
+                            } else {
+                                if ($('#voice-input-btn').prop('disabled')) {
+                                    // console.log("enabling voice dictation again")
+                                    $('#voice-input-btn').prop('disabled', false);
+                                    $('#voice-input-btn').click();
+                                }
+                            }
+                            conversationHistory += `${aiResponse}\n`;
+                            typeMessage(aiResponse, aiMessageElement.get(0));
+                            scrollToBottom();
+                        }
+                    },
+                    error: function(err) {
+                        console.error(err);
+                    },
+                    complete: function() {
+                        $('#user-input').val(''); // Clear input field
+                        scrollToBottom(); 
+                        textarea.style.height = 'auto';
+                    }
+                });
+            });
+
+            function scrollToBottom() {
+                const chatContainer = document.getElementById('chat-container');
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            function typeMessage(message, element, index = 0) {
+                if (index < message.length) {
+                    element.textContent += message.charAt(index);
+                    setTimeout(() => typeMessage(message, element, index + 1), 10);
+                }
+            }
+            function resizeTextarea() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            }
+            async function fetchAudioUrl(text) {
+                const response = await fetch('/synthesize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        ttsLanguage: $('#tts-language').val()
+                    }),
+                });
+
+                const data = await response.text();
+                return data;
+            }
+            async function playAudio(text) {
+                // console.log("requesting audio to GCP")
+                const audioUrl = await fetchAudioUrl(text);
+                const audio = new Audio(`data:audio/mp3;base64,${audioUrl}`);
+                audio.play();
+                await new Promise(resolve => audio.addEventListener('ended', resolve));
+                // console.log("audio played")
+                // if the voice button is disabled, enable it and start listening again
+                if ($('#voice-input-btn').prop('disabled')) {
+                    // console.log("enabling voice dictation again")
+                    $('#voice-input-btn').prop('disabled', false);
+                    $('#voice-input-btn').click();
+                }
+            }
+            $('#voice-input-btn').on('click', function() {
+                startVoiceDictation();
+            });
+            function startVoiceDictation() {
+                // console.log("starting voice dictation")
+                //disable voice button
+                $('#voice-input-btn').prop('disabled', true);
+                $('#voice-input-btn svg').css('fill', 'red');
+                if ('webkitSpeechRecognition' in window) {
+                    const recognition = new webkitSpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = $('#tts-language').val();
+                    recognition.start();
+                    recognition.onresult = function(event) {
+                        const result = event.results[0][0].transcript;
+                        $('#user-input').val(result);
+                        $('#chat-form').submit();
+                        //stop recognition
+                        recognition.stop();
+                        // console.log("stopped voice dictation")
+                        $('#voice-input-btn svg').css('fill', 'black');
+                    };
+                    recognition.onerror = function(event) {
+                        console.error(event);
+                        $('#voice-input-btn').prop('disabled', false);
+                        $('#voice-input-btn svg').css('fill', 'black');
+                    };
+                }
+            }
+        });
+    </script>
+</body>
+</html>

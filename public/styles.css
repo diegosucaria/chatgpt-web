@@ -1,0 +1,296 @@
+/* styles.css */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box;
+    transition: all 0.3s;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    margin-top: 0px;
+    font-weight: normal;
+    opacity: 0.9;
+}
+
+.chat-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    max-height: 500px;
+    min-height: 500px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    max-width: 80%;
+    margin-bottom: 10px;
+    padding: 10px 15px;
+    box-sizing: border-box;
+    line-height: 1.4;
+    position: relative;
+    word-wrap: break-word;
+    transition: transform 0.3s;
+    display: inline-block;
+    white-space: pre-wrap;
+}
+
+.user-message {
+    background-color: #4caf50;
+    color: #fff;
+    align-self: flex-end;
+    margin-left: auto;
+    display: block;
+    border-radius: 15px 0px 15px 15px;
+}
+
+.ai-message {
+    background-color: #f0f0f0;
+    color: #333;
+    align-self: flex-start;
+    margin-right: auto;
+    display: block;
+    border-radius: 0px 15px 15px 15px;
+}
+
+#chat-form {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+#user-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    box-sizing: border-box;
+    margin-right: 10px;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    white-space: pre-wrap;
+}
+
+#user-input:focus {
+    border-color: #4caf50;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    border: none;
+    border-radius: 25px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    outline: none;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.3s;
+}
+
+button:hover {
+    background-color: #3f8f40;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+@media screen and (max-width: 800px) {
+    .container {
+        padding: 10px;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    #user-input {
+        font-size: 0.9rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+    }
+}
+
+.message:hover {
+    transform: translateY(-3px);
+}
+
+.chat-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+.chat-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.temperature-label {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    background-color: #f0f0f0;
+    padding: 5px 8px;
+    border-radius: 5px;
+    vertical-align: middle;
+    transition: background-color 0.3s;
+}
+
+.temperature-select:focus + .temperature-label {
+    background-color: #e0e0e0;
+}
+
+.temperature-select {
+    margin-right: 10px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.tts-language-label {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    background-color: #f0f0f0;
+    padding: 5px 8px;
+    border-radius: 5px;
+    vertical-align: middle;
+    transition: background-color 0.3s;
+}
+
+.tts-language-select:focus + .tts-language-label {
+    background-color: #e0e0e0;
+}
+
+.tts-language-select {
+    margin-right: 10px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.tts-label {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    background-color: #f0f0f0;
+    padding: 5px 8px;
+    border-radius: 5px;
+    vertical-align: middle;
+    transition: background-color 0.3s;
+}
+
+.tts-checkbox {
+    position: relative;
+    appearance: none;
+    outline: none;
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.tts-checkbox:before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.tts-checkbox:checked {
+    background-color: #4caf50;
+}
+
+.tts-checkbox:checked:before {
+    transform: translateX(20px);
+}
+
+.controls-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.input-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 80%;
+}
+  
+#voice-input-btn {
+    background-color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    height: 30px;
+    outline: none;
+    padding: 5px;
+    transition: background-color 0.3s ease-in-out;
+    width: 30px;
+}
+
+#voice-input-btn svg {
+    height: 15px;
+}
+  
+#voice-input-btn:focus {
+    outline: none;
+}
+  
+#voice-input-btn:hover {
+    background-color: #eee;
+}

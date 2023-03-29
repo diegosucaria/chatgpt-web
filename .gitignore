@@ -1,0 +1,31 @@
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Dependency directories
+node_modules
+bower_components
+
+# Build and cache directories
+.cache/
+.dist/
+.nyc_output/
+.coverage/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*.swn
+*.bak
+
+# OS generated files
+.DS_Store
+Thumbs.db
+*.tmp
+
+cloudbuild.yaml
