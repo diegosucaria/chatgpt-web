@@ -6,6 +6,13 @@
     <title>ChatGPT-4 Web UI</title>
     <link rel="stylesheet" href="/styles.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.25.0/themes/prism.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.25.0/prism.js"></script>
+    <!-- Include the language grammar you need -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.25.0/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.25.0/components/prism-javascript.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -14,7 +21,12 @@
             <!-- Chat messages will be appended here -->
         </div>
         <form id="chat-form">
-            <div class="controls-container">
+            <div class="model-controls-container">
+                <label for="model" class="model-label">Model:</label>
+                <select id="model" class="model-select">
+                    <option value="gpt-3.5-turbo" selected>gpt-3.5-turbo</option>
+                    <option value="text-davinci-002">text-davinci-002</option>
+                </select>
                 <label for="temperature" class="temperature-label">Temperature:</label>
                 <select id="temperature" class="temperature-select">
                     <option value="0.2">0.2</option>
@@ -24,6 +36,8 @@
                     <option value="0.8">0.8</option>
                     <option value="1.0">1.0</option>
                 </select>
+            </div>
+            <div class="voice-controls-container">
                 <label for="tts-language" class="tts-language-label">TTS Language:</label>
                 <select id="tts-language" class="tts-language-select">
                     <option value="en-US" selected>en-US</option>
@@ -68,12 +82,21 @@
                 $.ajax({
                     url: '/generate',
                     type: 'POST',
-                    data: JSON.stringify({ prompt: conversationHistory, temperature: parseFloat($('#temperature').val()) }),
+                    data: JSON.stringify({ prompt: conversationHistory, temperature: parseFloat($('#temperature').val()), model: $('#model').val() }),
                     contentType: 'application/json; charset=utf-8',
                     dataType: 'json',
                     success: function(response) {
                         if (response && response.choices[0]) {
-                            const aiResponse = response.choices[0].text.trim();
+                            let aiResponse = ''
+                            switch ($('#model').val()) {
+                                case 'gpt-3.5-turbo':
+                                    aiResponse = response.choices[0].message.content.trim();
+                                    break;
+                                case 'text-davinci-002':
+                                    aiResponse = response.choices[0].text.trim();
+                                    break;
+                            }
+                            aiResponse = formatCodeBlocks(aiResponse);
                             // Append AI response
                             const aiMessageElement = $('<div class="message ai-message"></div>');
                             $('#chat-container').append(aiMessageElement);
@@ -107,14 +130,29 @@
                 chatContainer.scrollTop = chatContainer.scrollHeight;
             }
             function typeMessage(message, element, index = 0) {
-                if (index < message.length) {
-                    element.textContent += message.charAt(index);
-                    setTimeout(() => typeMessage(message, element, index + 1), 10);
+                const words = message.split(' ');
+
+                if (index < words.length) {
+                    element.textContent += (index !== 0 ? ' ' : '') + words[index];
+                    setTimeout(() => typeMessage(message, element, index + 1), words[index].length * 10);
+                    scrollToBottom();
+                }else{
+                    element.innerHTML = element.textContent
                 }
             }
             function resizeTextarea() {
                 this.style.height = 'auto';
                 this.style.height = (this.scrollHeight) + 'px';
+            }
+            function formatCodeBlocks(message) {
+                const codeBlockRegex = /```(\w+)?\s([\s\S]+?)```/g;
+                return message.replace(codeBlockRegex, function (match, lang, code) {
+                    if (lang) {
+                        return `<pre><code class="language-${lang}">${code}</code></pre>`;
+                    } else {
+                        return `<pre><code>${code}</code></pre>`;
+                    }
+                });
             }
             async function fetchAudioUrl(text) {
                 const response = await fetch('/synthesize', {

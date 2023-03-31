@@ -186,6 +186,33 @@ button:active {
     transition: border-color 0.3s;
 }
 
+.model-label {
+    display: inline-block;
+    margin-right: 5px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    background-color: #f0f0f0;
+    padding: 5px 8px;
+    border-radius: 5px;
+    vertical-align: middle;
+    transition: background-color 0.3s;
+}
+
+.model-select:focus + .model-label {
+    background-color: #e0e0e0;
+}
+
+.model-select {
+    margin-right: 10px;
+    padding: 5px 10px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
 .tts-language-label {
     display: inline-block;
     margin-right: 5px;
@@ -258,7 +285,13 @@ button:active {
     transform: translateX(20px);
 }
 
-.controls-container {
+.model-controls-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.voice-controls-container {
     display: flex;
     align-items: center;
     margin-bottom: 10px;
@@ -293,4 +326,16 @@ button:active {
   
 #voice-input-btn:hover {
     background-color: #eee;
+}
+
+pre {
+    background-color: #282c34;
+    color: #a9b7c6;
+    font-family: 'Source Code Pro', 'Consolas', 'Courier New', monospace;
+    padding: 5px 10px;
+    margin: 5px 0;
+    border-radius: 3px;
+    white-space: pre-wrap;
+    font-size: 0.9em;
+    overflow-x: auto;
 }
